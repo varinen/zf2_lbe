@@ -1,14 +1,87 @@
 <?php
 namespace User\Model\Entity;
 
+use Zend\Form\Annotation;
+
+/**
+ * @Annotation\Name("users")
+ * @Annotation\Hydrator("Zend\Stdlib\Hydrator\ClassMethods")
+ *
+ * @Entity
+ * @Table(name="users")
+ *
+ * Class User
+ * @package User\Model\Entity
+ */
 class User {
-	protected $id;
-	protected $role;
-	protected $name;
+    /**
+     * @Annotation\Exclude()
+     * @Id
+     * @GeneratedValue
+     * @Column(type="integer")
+     */
+    protected $id;
+    /**
+     * @Annotaion\Exclude()
+     *
+     * @Column(type="string")
+     */
+    protected $role;
+    /**
+     * @Annotation\Type("Zend\Form\Element\Text")
+     * @Annotation\Options({"label":"Name:"})
+     * @Annotation\Filter({"name:":"StripTags"})
+     * @Annotation\Filter({"name:":"StringTrim"})
+     * @Annotation\Attribute({"required":true,"placeholder":"Type name..."})
+     * @Annotation\Flags({"priority":"300"})
+     *
+     * @Column(type="string")
+     */
+    protected $name;
+    /**
+     * @Annotation\Type("Zend\Form\Element\Email")
+     * @Annotation\Validator({"name":"EmailAddress"})
+     * @Annotation\Options({"label":"Email:"})
+     * @Annotation\Attributes({"type":"email","required":true,"placeholder":"Email Address..."})
+     * @Annotation\Flags({"priority":"500"})
+     *
+     * @Column(type="string")
+     *
+     */
 	protected $email;
-	protected $phone;
-	protected $photo;
-	protected $password;
+    /**
+     * @Annotation\Type("Zend\Form\Element\Text")
+     * @Annotation\Options({"label":"Your phone number:"})
+     * @Annotation\Filter({"name":"StripTags"})
+     * @Annotation\Filter({"name":"StringTrim"})
+     * @Annotation\Validator({"name":"RegEx", "options": {"Pattern":"/^[\d-\/]+$/"}})
+     * @Annotation\Attributes({"type":"tel","required":true, "pattern": "^[\d-/]+$"})
+     * @Annotation\Flags({"priority":"100"})
+     *
+     * @Column(type="string")
+     *
+     */
+    protected $phone;
+    /**
+     * @Annotation\Type("Zend\Form\Element\File")
+     * @Annotation\Options({"label":"Your photo:"})
+     * @Annotation\Attributes({"id":"photo","required":true})
+     * @Annotation\Flags({"priority":100"})
+     *
+     * @Column(type="string")
+     *
+     */
+    protected $photo;
+    /**
+     * @Annotation\Type("Zend\Form\Element\Text")
+     * @Annotation\Filter({"name":"StripTags"})
+     * @Annotation\Filter({"name":"StringTrim"})
+     * @Annotation\Options({"label":"Password:", "priority":400})
+     * @Annotation\Flags({"priority":"400"})
+     *
+     * @Column(type="string")
+     */
+    protected $password;
 
 	/**
 	 * @return the $id

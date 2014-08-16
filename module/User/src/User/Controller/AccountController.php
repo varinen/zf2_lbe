@@ -1,9 +1,9 @@
 <?php
 namespace User\Controller;
 
-use User\Form\User as UserForm;
-use User\Model\User as UserModel;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\EventManager\EventManager;
+use Zend\Form\Annotation\AnnotationBuilder;
 
 class AccountController extends AbstractActionController
 {
@@ -14,8 +14,44 @@ class AccountController extends AbstractActionController
 
     public function addAction()
     {
-        $form = new UserForm();
-        if($this->getRequest()->isPost()) {
+        $builder = new AnnotationBuilder();
+        $entity  = $this->serviceLocator->get('user-entity');
+        $form    = $builder->createForm($entity);
+        $form->add(
+            array(
+                'name' => 'password_verify',
+                'type' => 'Zend\Form\Element\Password',
+                'attributes' => array(
+                    'placeholder' => 'Verify Password Here...',
+                    'required' => 'required'
+                ),
+                'options' => array(
+                    'label' => 'Verify Password'
+                ),
+            ),
+            array(
+                'priority' => $form->get('password')->getOption('priority')
+            )
+        );
+        $form->add(
+            array(
+                'name' => 'csrf',
+                'type' => 'Zend\Form\Element\Csrf'
+            )
+        );
+        $form->add(
+            array(
+                'name' => 'submit',
+                'type' => 'Zend\Form\Element\Submit',
+                'attributes' => array(
+                    'value' => 'Submit',
+                    'required' => 'false'
+                )
+            )
+        );
+        $form->bind($entity);
+
+        if ($this->getRequest()->isPost()) {
             $data = array_merge_recursive(
                 $this->getRequest()->getPost()->toArray(),
                 // Notice: make certain to merge the Files also to the post data
@@ -23,20 +59,21 @@ class AccountController extends AbstractActionController
             );
             $form->setData($data);
             if($form->isValid()) {
-                // You can use the standard way of instantiating a table gateway
-                //$model = new UserModel();
-                // Or if you have many db tables that do need special treatment of the incoming data
-                // you can use the table gateway service
-                $model = $this->serviceLocator->get('table-gateway')->get('users');
-                $id = $model->insert($form->getData());
+                $entityManager = $this->serviceLocator->get('entity-manager');
+                $entityManager->persist($entity);
+                $entityManager->flush();
 
                 $this->flashmessenger()->addSuccessMessage('User was added successfully.');
 
+                $event = new EventManager('user');
+                $event->trigger('register', $this, array(
+                    'user' => $entity
+                ));
                 // redirect the user to the view user action
                 return $this->redirect()->toRoute('user/default', array (
                         'controller' => 'account',
                         'action'     => 'view',
-                        'id'		 => $id
+                        'id'		 => $entity->getId()
                 ));
             }
         }

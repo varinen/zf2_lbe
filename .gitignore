@@ -11,3 +11,6 @@ vendor/bin
 .vagrant/
 vendor/phpunit
 vendor/symfony
+vendor/doctrine
+vendor/doctrine-build-common
+vendor/doctrine-common
