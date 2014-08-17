@@ -53,18 +53,34 @@ return array(
     'service_manager' => array (
         'factories' => array(
             'database' => 'User\Service\Factory\Database',
+            'entity-manager' => 'User\Service\Factory\EntityManager'
         ),
         'invokables' => array(
             'table-gateway' => 'User\Service\Invokable\TableGateway',
             'user-entity'  => 'User\Model\Entity\User',
+            'doctrine-profiler' => 'User\Service\Invokable\DoctrineProfiler',
         ),
         'shared' => array(
             'user-entity' => false,
-        )
+        ),
     ),
     'table-gateway' => array(
         'map' => array(
             'users' => 'User\Model\User',
+        )
+    ),
+    'doctrine' => array(
+        'driver' => array(
+            'User' . '_driver' => array(
+                'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
+                'cache' => 'array',
+                'paths' => array(__DIR__ . '/../src/' . 'User' . '/Model/Entity')
+            ),
+            'orm_default' => array(
+                'drivers' => array(
+                    'User' . '\Model\Entity' => 'User' . '_driver'
+                )
+            )
         )
     )
 );

@@ -2,16 +2,18 @@
 namespace User\Model\Entity;
 
 use Zend\Form\Annotation;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\Index;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Column;
 
 /**
  * @Annotation\Name("users")
  * @Annotation\Hydrator("Zend\Stdlib\Hydrator\ClassMethods")
  *
- * @Entity
- * @Table(name="users")
- *
- * Class User
- * @package User\Model\Entity
+ * @Entity @Table(name="users")
  */
 class User {
     /**
@@ -22,7 +24,7 @@ class User {
      */
     protected $id;
     /**
-     * @Annotaion\Exclude()
+     * @Annotation\Exclude()
      *
      * @Column(type="string")
      */
@@ -32,12 +34,22 @@ class User {
      * @Annotation\Options({"label":"Name:"})
      * @Annotation\Filter({"name:":"StripTags"})
      * @Annotation\Filter({"name:":"StringTrim"})
-     * @Annotation\Attribute({"required":true,"placeholder":"Type name..."})
+     * @Annotation\Attributes({"required":true,"placeholder":"Type name..."})
      * @Annotation\Flags({"priority":"300"})
      *
      * @Column(type="string")
      */
     protected $name;
+    /**
+     * @Annotation\Type("Zend\Form\Element\File")
+     * @Annotation\Options({"label":"Your photo:"})
+     * @Annotation\Attributes({"id":"photo","required":true})
+     * @Annotation\Flags({"priority":100})
+     *
+     * @Column(type="string")
+     *
+     */
+    protected $photo;
     /**
      * @Annotation\Type("Zend\Form\Element\Email")
      * @Annotation\Validator({"name":"EmailAddress"})
@@ -62,16 +74,7 @@ class User {
      *
      */
     protected $phone;
-    /**
-     * @Annotation\Type("Zend\Form\Element\File")
-     * @Annotation\Options({"label":"Your photo:"})
-     * @Annotation\Attributes({"id":"photo","required":true})
-     * @Annotation\Flags({"priority":100"})
-     *
-     * @Column(type="string")
-     *
-     */
-    protected $photo;
+
     /**
      * @Annotation\Type("Zend\Form\Element\Text")
      * @Annotation\Filter({"name":"StripTags"})
@@ -83,7 +86,9 @@ class User {
      */
     protected $password;
 
-	/**
+
+
+    /**
 	 * @return the $id
 	 */
 	public function getId() 

@@ -16,6 +16,51 @@ class EntityManager implements FactoryInterface
 
         //ote the difference between database config parameters in Doctrine and ZF2
         $doctrineDbConfig = (array) $config['db'];
-        $doctrineDbConfig['driver'] = strtolower()
+        $doctrineDbConfig['driver'] = strtolower($doctrineDbConfig['driver']);
+        if (!isset($doctrineDbConfig['dbname'])) {
+            $doctrineDbConfig['dbname'] = $doctrineDbConfig['database'];
+        }
+        if (!isset($doctrineDbConfig['host'])) {
+            $doctrineDbConfig['host'] = $doctrineDbConfig['hostname'];
+        }
+        if (!isset($doctrineDbConfig['user'])) {
+            $doctrineDbConfig['user'] = $doctrineDbConfig['username'];
+        }
+
+        $doctrineConfig = Setup::createAnnotationMetadataConfiguration($config['doctrine']['entity_path'], true);
+        $entityManager  = DoctrineEntityManager::create($doctrineDbConfig, $doctrineConfig);
+
+        if (isset($config['doctrine']['initializers'])) {
+            $eventManager = $entityManager->getEventManager();
+
+            foreach ($config['doctrine']['initializers'] as $initilizer) {
+                $eventClass = new DoctrineEvent(new $initilizer(), $serviceLocator);
+                $eventManager->addEventListener(\Doctrine\ORM\Events::postLoad, $eventClass);
+            }
+        }
+
+        if ($serviceLocator->has('doctrine-profiler')) {
+            $profiler = $serviceLocator->get('doctrine-profiler');
+            $entityManager->getConfiguration()->setSQLLogger($profiler);
+        }
+
+        //return $entityManager;
+    }
+}
+
+class DoctrineEvent
+{
+    protected $initializer;
+
+    public function __construct($initializer, $serviceLocator)
+    {
+        $this->initializer = $initializer;
+        $this->serviceLocator = $serviceLocator;
+    }
+
+    public function postLoad(EventArgs $event)
+    {
+        $entity = $event->getEntity();
+        $this->initializer->initilize($entity, $this->serviceLocator);
     }
 }

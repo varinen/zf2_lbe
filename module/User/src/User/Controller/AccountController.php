@@ -113,6 +113,13 @@ class AccountController extends AbstractActionController
                 'action' => 'view',
             ));
         }
+
+        $entityManager = $this->serviceLocator->get('entity-manager');
+        $userEntity = $this->serviceLocator->get('user-entity');
+        $userEntity->setId($id);
+        $entityManager->remove($userEntity);
+        $entityManager->flush();
+        return array();
     }
 
     public function meAction()
